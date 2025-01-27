@@ -1,0 +1,17 @@
+{
+  "name": "side-signing-demo",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "test": "node main.js"
+  },
+  "dependencies": {
+    "bitcoinjs-lib": "^6.1.7",
+    "bitcoinjs-message": "^2.2.0",
+    "cosmjs-types": "^0.9.0",
+    "ecpair": "^3.0.0-rc.0",
+    "tiny-secp256k1": "^2.2.3"
+  }
+}
