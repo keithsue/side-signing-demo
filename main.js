@@ -10,6 +10,8 @@ const bitcoin = require("bitcoinjs-lib");
 const bitcoinMessage = require("bitcoinjs-message");
 const { ECPairFactory } = require("ecpair");
 const ecc = require("tiny-secp256k1");
+const { BIP32Factory } = require('bip32')
+const bip39 = require("bip39");
 
 // init ECC
 bitcoin.initEccLib(ecc);
@@ -17,14 +19,23 @@ bitcoin.initEccLib(ecc);
 // build global ECPair instance
 const ECPair = ECPairFactory(ecc);
 
+// build bip32 instance
+const bip32 = BIP32Factory(ecc)
+
 async function main() {
     // create client
     const restEndpoint = "https://rest.side.one"; // can be replaced by your choice
     const client = new Client(restEndpoint);
 
-    // import private key
-    const privKeyHex = "<private key>"; // hex encoded private key
-    const privKey = Buffer.from(privKeyHex, "hex");
+    // import private key from mnemonic
+    const mnemonic = "<mnemonic>";
+    const path = "m/86'/0'/0'/0/0"; // taproot path
+    const privKey = derivePrivateKey(mnemonic, path);
+
+    // // import private key
+    // const privKeyHex = "<private key>"; // hex encoded private key
+    // const privKey = Buffer.from(privKeyHex, "hex");
+
     const keyPair = ECPair.fromPrivateKey(privKey, { compressed: true });
 
     // generate taproot address
@@ -154,6 +165,16 @@ class Client {
             console.error('Error broadcasting transaction:', error);
         }
     }
+}
+
+// derive the private key from the specified mnemonic and path
+function derivePrivateKey(mnemonic, path) {
+    const seed = bip39.mnemonicToSeedSync(mnemonic);
+
+    const root = bip32.fromSeed(seed, bitcoin.networks.bitcoin);
+    const child = root.derivePath(path);
+
+    return child.privateKey;
 }
 
 main();
